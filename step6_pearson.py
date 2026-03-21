@@ -2,7 +2,7 @@
 #
 # По заданию:
 #   ρ(X) = Σ (ni - n·pi*)² / (n·pi*)
-#   df = m - l - 1,  где l — число оцениваемых параметров
+#   df = m - l - 1, где l — число оцениваемых параметров
 #   τ(1-α) — квантиль χ²(df)
 #   Принять H0 если ρ_набл < τ(1-α)
 
@@ -18,6 +18,8 @@ _N_PARAMS = {
     'laplace':  2,   # a, σ
     'rayleigh': 1,   # σ
     'uniform':  2,   # a, b
+    'chi2':     1,   # k
+    'student':  1,   # k
 }
 
 _DIST_NAMES = {
@@ -26,6 +28,8 @@ _DIST_NAMES = {
     'laplace':  'Лапласа',
     'rayleigh': 'Рэлея',
     'uniform':  'Равномерное',
+    'chi2':     'Хи-квадрат χ²',
+    'student':  'Стьюдента t_k',
 }
 
 
@@ -49,12 +53,16 @@ def _interval_prob(edges, params):
         elif dist == 'uniform':
             return stats.uniform.cdf(x, loc=params['a'],
                                      scale=params['b'] - params['a'])
+        elif dist == 'chi2':
+            return stats.chi2.cdf(x, df=params['k'])
+        elif dist == 'student':
+            return stats.t.cdf(x, df=params['k'])
         raise ValueError(f"Неизвестное: {dist}")
 
     for i in range(m):
         lo = edges[i]
         hi = edges[i + 1]
-        # Для последнего интервала правая граница = +∞ (как в примере задания)
+        # Для последнего интервала правая граница = +∞
         if i == m - 1:
             probs[i] = 1.0 - cdf(lo)
         else:

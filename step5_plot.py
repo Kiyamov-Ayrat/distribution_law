@@ -25,7 +25,10 @@ def _theoretical_pdf(x_vals, params):
     elif dist == 'uniform':
         return stats.uniform.pdf(x_vals, loc=params['a'],
                                  scale=params['b'] - params['a'])
-    raise ValueError(f"Неизвестное распределение: {dist}")
+    elif dist == 'chi2':
+        return stats.chi2.pdf(x_vals, df=params['k'])
+    elif dist == 'student':
+        return stats.t.pdf(x_vals, df=params['k'])
 
 
 def _dist_label(params):
@@ -40,6 +43,10 @@ def _dist_label(params):
         return f"Рэлея  σ*={params['sigma']:.4f}"
     elif dist == 'uniform':
         return f"Равномерное  a*={params['a']:.2f}, b*={params['b']:.2f}"
+    elif dist == 'chi2':
+        return f"Хи-квадрат χ²  k*={params['k']:.2f}"
+    elif dist == 'student':
+        return f"Стьюдента t_k  k*={params['k']:.2f}"
 
 
 def plot_histogram(counts, edges, midpoints, widths, params, filename="lab2_histogram.png"):

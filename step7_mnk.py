@@ -40,8 +40,15 @@ def _rho(param_vec, counts, edges):
             return 1e9
         params = {'a': param_vec[0], 'b': param_vec[1]}
 
-    else:
-        raise ValueError(f"Неизвестное: {dist}")
+    elif dist == 'chi2':
+        if param_vec[0] <= 0:
+            return 1e9
+        params = {'k': param_vec[0]}
+
+    elif dist == 'student':
+        if param_vec[0] <= 2:
+            return 1e9
+        params = {'k': param_vec[0]}
 
     probs = _interval_prob(edges, params)
     # Защита от нуля
@@ -70,6 +77,12 @@ def mnk_refine(params_mm, counts, edges, rho_before):
     elif dist == 'uniform':
         x0 = [params_mm['a'], params_mm['b']]
         bounds = [(None, None), (None, None)]
+    elif dist == 'chi2':
+        x0 = [params_mm['k']]
+        bounds = [(1e-3, None)]
+    elif dist == 'student':
+        x0 = [params_mm['k']]
+        bounds = [(2.01, None)]
 
     result = optimize.minimize(
         _rho, x0, args=(counts, edges),
@@ -93,6 +106,12 @@ def mnk_refine(params_mm, counts, edges, rho_before):
     elif dist == 'uniform':
         params_mnk = {'a': x_opt[0], 'b': x_opt[1]}
         param_str  = f"a* = {x_opt[0]:.6f},  b* = {x_opt[1]:.6f}"
+    elif dist == 'chi2':
+        params_mnk = {'k': x_opt[0]}
+        param_str  = f"k* = {x_opt[0]:.6f}"
+    elif dist == 'student':
+        params_mnk = {'k': x_opt[0]}
+        param_str  = f"k* = {x_opt[0]:.6f}"
 
     l      = _N_PARAMS[dist]
     m      = len(counts)
