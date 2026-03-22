@@ -173,11 +173,11 @@ def plot_final(counts, edges, params_mnk, rho_after, p_val,
     x_lo = 0.0 if dist in ('expon', 'rayleigh') else edges[0]
     x_line = np.linspace(x_lo, edges[-1], 500)
     y_line = _theoretical_pdf(x_line, params_mnk)
-    ax.plot(x_line, y_line, 'r-', linewidth=2)
+    ax.plot(x_line, y_line, 'r-', linewidth=2, label='Теоретическое (МНК)')
 
     # Точки сравнения (как на графике в примере задания)
-    ax.plot(midpoints, rho_th,  'r-s', markersize=7, label='Теоретическое (МНК)')
-    ax.plot(midpoints, rho_emp, 'b-^', markersize=7, label='Эмпирическое')
+    ax.plot(midpoints, rho_th,  'rs', markersize=7)
+    ax.plot(midpoints, rho_emp, 'b-^', markersize=7, label='Эмпирическое (середины)')
 
     ax.set_xlabel("x")
     ax.set_ylabel("Плотность частоты")

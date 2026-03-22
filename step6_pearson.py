@@ -89,7 +89,6 @@ def pearson_test(counts, edges, params, silent=False):
     print("ШАГ 6: КРИТЕРИЙ ПИРСОНА")
     print("=" * 55)
     print(f"Гипотеза H₀: {_DIST_NAMES[DISTRIBUTION]} распределение")
-    print()
     print(f"  {'Интервал':<22} {'nᵢ':>6} {'n·pᵢ*':>9} {'(nᵢ-npᵢ*)²/npᵢ*':>18}")
     print(f"  {'-' * 60}")
     for i in range(m):
