@@ -18,13 +18,11 @@ def load_data():
     total_rows = len(df)
     mask = pd.Series(True, index=df.index)
 
-    # Фильтр 1: только строки где долото на забое (идёт бурение)
     if "On Bottom (unitless)" in df.columns:
         mask &= df["On Bottom (unitless)"] == 1
     else:
         print("  ПРЕДУПРЕЖДЕНИЕ: столбец 'On Bottom (unitless)' не найден, фильтр пропущен")
 
-    # Фильтр 2: насосы активны (раствор циркулирует)
     if "Total Pump Output (gal_per_min)" in df.columns:
         mask &= df["Total Pump Output (gal_per_min)"] > 50
     else:
@@ -32,7 +30,6 @@ def load_data():
 
     raw = df.loc[mask, CSV_COLUMN].dropna()
 
-    # Фильтр 3: диапазон значений из config.py
     n_before = len(raw)
     if VALUE_MIN is not None:
         raw = raw[raw >= VALUE_MIN]

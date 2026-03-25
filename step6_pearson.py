@@ -1,69 +1,26 @@
 # step6_pearson.py — Шаг 6: Критерий Пирсона χ²
 #
-# По заданию:
-#   ρ(X) = Σ (ni - n·pi*)² / (n·pi*)
-#   df = m - l - 1, где l — число оцениваемых параметров
-#   τ(1-α) — квантиль χ²(df)
-#   Принять H0 если ρ_набл < τ(1-α)
+# Показательное распределение: l = 1 параметр (α)
+# df = m - l - 1 = m - 2
 
 import numpy as np
 from scipy import stats
-from config import DISTRIBUTION, ALPHA
-
-
-# Число параметров распределения (l)
-_N_PARAMS = {
-    'expon':    1,   # α
-    'normal':   2,   # a, σ
-    'laplace':  2,   # a, σ
-    'rayleigh': 1,   # σ
-    'uniform':  2,   # a, b
-    'chi2':     1,   # k
-    'student':  1,   # k
-}
-
-_DIST_NAMES = {
-    'expon':    'Показательное',
-    'normal':   'Нормальное',
-    'laplace':  'Лапласа',
-    'rayleigh': 'Рэлея',
-    'uniform':  'Равномерное',
-    'chi2':     'Хи-квадрат χ²',
-    'student':  'Стьюдента t_k',
-}
+from config import ALPHA
 
 
 def _interval_prob(edges, params):
     """Теоретические вероятности попадания в каждый интервал."""
-    dist = DISTRIBUTION
-    m    = len(edges) - 1
+    alpha = params['alpha']
+    m     = len(edges) - 1
     probs = np.zeros(m)
 
     def cdf(x):
-        if dist == 'expon':
-            alpha = params['alpha']
-            return 1.0 - np.exp(-alpha * x) if x >= 0 else 0.0
-        elif dist == 'normal':
-            return stats.norm.cdf(x, loc=params['a'], scale=params['sigma'])
-        elif dist == 'laplace':
-            return stats.laplace.cdf(x, loc=params['a'],
-                                     scale=params['sigma'] / np.sqrt(2))
-        elif dist == 'rayleigh':
-            return stats.rayleigh.cdf(x, scale=params['sigma'])
-        elif dist == 'uniform':
-            return stats.uniform.cdf(x, loc=params['a'],
-                                     scale=params['b'] - params['a'])
-        elif dist == 'chi2':
-            return stats.chi2.cdf(x, df=params['k'])
-        elif dist == 'student':
-            return stats.t.cdf(x, df=params['k'])
-        raise ValueError(f"Неизвестное: {dist}")
+        return 1.0 - np.exp(-alpha * x) if x >= 0 else 0.0
 
     for i in range(m):
         lo = edges[i]
         hi = edges[i + 1]
-        # Для последнего интервала правая граница = +∞
-        if i == m - 1:
+        if i == m - 1:          # последний интервал — правый хвост до +∞
             probs[i] = 1.0 - cdf(lo)
         else:
             probs[i] = cdf(hi) - cdf(lo)
@@ -71,24 +28,28 @@ def _interval_prob(edges, params):
     return probs
 
 
-def pearson_test(counts, edges, params, silent=False):
+def pearson_test(counts, edges, params):
     n      = counts.sum()
     m      = len(counts)
-    l      = _N_PARAMS[DISTRIBUTION]
+    l      = 1           # один параметр α
     df     = m - l - 1
     probs  = _interval_prob(edges, params)
     np_    = n * probs
+
     with np.errstate(divide="ignore", invalid="ignore"):
-        terms = np.where(np_ > 0, (counts - np_)**2 / np_, np.where(counts > 0, 1e15, 0.0))
-    rho    = terms.sum()
-    rho_cr = stats.chi2.ppf(1 - ALPHA, df)
-    p_val  = 1.0 - stats.chi2.cdf(rho, df)
+        terms = np.where(np_ > 0,
+                         (counts - np_) ** 2 / np_,
+                         np.where(counts > 0, 1e15, 0.0))
+
+    rho      = terms.sum()
+    rho_cr   = stats.chi2.ppf(1 - ALPHA, df)
+    p_val    = 1.0 - stats.chi2.cdf(rho, df)
     accepted = rho < rho_cr
 
     print("\n" + "=" * 55)
     print("ШАГ 6: КРИТЕРИЙ ПИРСОНА")
     print("=" * 55)
-    print(f"Гипотеза H₀: {_DIST_NAMES[DISTRIBUTION]} распределение")
+    print(f"Гипотеза H₀: Показательное распределение")
     print(f"  {'Интервал':<22} {'nᵢ':>6} {'n·pᵢ*':>9} {'(nᵢ-npᵢ*)²/npᵢ*':>18}")
     print(f"  {'-' * 60}")
     for i in range(m):
@@ -102,7 +63,7 @@ def pearson_test(counts, edges, params, silent=False):
     print()
     rho_disp = f"{rho:.4f}" if rho < 1e13 else "∞"
     print(f"  ρ_набл = {rho_disp}")
-    print(f"  df     = m - l - 1 = {m} - {l} - 1 = {df}")
+    print(f"  df     = m - l - 1 = {m} - 1 - 1 = {df}")
     print(f"  ρ_кр   = {rho_cr:.4f}  (α = {ALPHA})")
     print()
     if accepted:
