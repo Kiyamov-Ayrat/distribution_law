@@ -11,7 +11,7 @@ from config import ALPHA
 def _interval_prob(edges, params):
     """Теоретические вероятности попадания в каждый интервал."""
     alpha = params['alpha']
-    m     = len(edges) - 1
+    m = len(edges) - 1
     probs = np.zeros(m)
 
     def cdf(x):
@@ -29,27 +29,25 @@ def _interval_prob(edges, params):
 
 
 def pearson_test(counts, edges, params):
-    n      = counts.sum()
-    m      = len(counts)
-    l      = 1           # один параметр α
-    df     = m - l - 1
-    probs  = _interval_prob(edges, params)
-    np_    = n * probs
+    n = counts.sum()
+    m = len(counts)
+    l = 1           # один параметр а
+    df = m - l - 1
+    probs = _interval_prob(edges, params)
+    np_ = n * probs
 
     with np.errstate(divide="ignore", invalid="ignore"):
         terms = np.where(np_ > 0,
                          (counts - np_) ** 2 / np_,
                          np.where(counts > 0, 1e15, 0.0))
 
-    rho      = terms.sum()
-    rho_cr   = stats.chi2.ppf(1 - ALPHA, df)
-    p_val    = 1.0 - stats.chi2.cdf(rho, df)
+    rho = terms.sum()
+    rho_cr = stats.chi2.ppf(1 - ALPHA, df)
+    p_val = 1.0 - stats.chi2.cdf(rho, df)
     accepted = rho < rho_cr
 
-    print("\n" + "=" * 55)
-    print("ШАГ 6: КРИТЕРИЙ ПИРСОНА")
-    print("=" * 55)
-    print(f"Гипотеза H₀: Показательное распределение")
+    print("КРИТЕРИЙ ПИРСОНА")
+    print(f"Гипотеза Ho: Показательное распределение")
     print(f"  {'Интервал':<22} {'nᵢ':>6} {'n·pᵢ*':>9} {'(nᵢ-npᵢ*)²/npᵢ*':>18}")
     print(f"  {'-' * 60}")
     for i in range(m):
@@ -62,13 +60,13 @@ def pearson_test(counts, edges, params):
     print(f"  {'ИТОГО':>28} {n:6d} {np_.sum():9.4f} {rho_str}")
     print()
     rho_disp = f"{rho:.4f}" if rho < 1e13 else "∞"
-    print(f"  ρ_набл = {rho_disp}")
+    print(f"  p_набл = {rho_disp}")
     print(f"  df     = m - l - 1 = {m} - 1 - 1 = {df}")
-    print(f"  ρ_кр   = {rho_cr:.4f}  (α = {ALPHA})")
+    print(f"  p_кр   = {rho_cr:.4f}  (α = {ALPHA})")
     print()
     if accepted:
-        print(f"  Гипотеза H₀ ПРИНЯТА ✓  (ρ_набл = {rho:.4f} < ρ_кр = {rho_cr:.4f})")
+        print(f"  Гипотеза Ho ПРИНЯТА (p_набл = {rho:.4f} < p_кр = {rho_cr:.4f})")
     else:
-        print(f"  Гипотеза H₀ ОТВЕРГНУТА ✗  (ρ_набл = {rho:.4f} ≥ ρ_кр = {rho_cr:.4f})")
+        print(f"  Гипотеза Ho ОТВЕРГНУТА (p_набл = {rho:.4f} ≥ p_кр = {rho_cr:.4f})")
 
     return rho, rho_cr, df, p_val, accepted, probs

@@ -15,10 +15,10 @@ def _rho_func(param_vec, counts, edges):
     alpha = param_vec[0]
     if alpha <= 0:
         return 1e9
-    n      = counts.sum()
-    probs  = _interval_prob(edges, {'alpha': alpha})
-    probs  = np.clip(probs, 1e-12, None)
-    np_    = n * probs
+    n = counts.sum()
+    probs = _interval_prob(edges, {'alpha': alpha})
+    probs = np.clip(probs, 1e-12, None)
+    np_ = n * probs
     return float(np.sum((counts - np_) ** 2 / np_))
 
 
@@ -29,36 +29,32 @@ def mnk_refine(params_mm, counts, edges, rho_before):
         options={'ftol': 1e-12, 'gtol': 1e-10, 'maxiter': 1000}
     )
 
-    alpha_opt  = result.x[0]
+    alpha_opt = result.x[0]
     params_mnk = {'alpha': alpha_opt}
-    rho_after  = result.fun
+    rho_after = result.fun
 
-    m        = len(counts)
-    df       = m - 1 - 1       # l = 1
-    rho_cr   = stats.chi2.ppf(1 - ALPHA, df)
-    p_val    = 1.0 - stats.chi2.cdf(rho_after, df)
+    m = len(counts)
+    df = m - 1 - 1       # l = 1
+    rho_cr = stats.chi2.ppf(1 - ALPHA, df)
+    p_val = 1.0 - stats.chi2.cdf(rho_after, df)
     accepted = rho_after < rho_cr
 
-    print("\n" + "=" * 55)
-    print("ШАГ 7: УТОЧНЕНИЕ ПАРАМЕТРОВ (МНК)")
-    print("=" * 55)
-    print(f"  ρ до МНК  (метод моментов): {rho_before:.4f}")
-    print(f"  ρ после МНК:                {rho_after:.4f}")
-    print(f"  Параметры МНК: α* = {alpha_opt:.6f}")
+    print("УТОЧНЕНИЕ ПАРАМЕТРОВ (МНК)")
+    print(f"p до МНК  (метод моментов): {rho_before:.4f}")
+    print(f"p после МНК: {rho_after:.4f}")
+    print(f" Параметры МНК: a* = {alpha_opt:.6f}")
 
-    print("\n" + "=" * 55)
-    print("ШАГ 8: ИТОГОВЫЙ РЕЗУЛЬТАТ")
-    print("=" * 55)
-    print(f"  Распределение: Показательное")
-    print(f"  Параметры МНК: α* = {alpha_opt:.6f}")
-    print(f"  ρ_набл = {rho_after:.4f}")
-    print(f"  ρ_кр   = {rho_cr:.4f}  (α = {ALPHA},  df = {df})")
-    print(f"  α₀     = {p_val:.4f}   ← реально достигнутый уровень значимости")
+    print("ИТОГОВЫЙ РЕЗУЛЬТАТ")
+    print(f"Распределение: Показательное")
+    print(f"Параметры МНК: a* = {alpha_opt:.6f}")
+    print(f"p_набл = {rho_after:.4f}")
+    print(f"p_кр = {rho_cr:.4f}  (α = {ALPHA},  df = {df})")
+    print(f"ao = {p_val:.4f} - реально достигнутый уровень значимости")
     print()
     if accepted:
-        print(f"  Гипотеза H₀: ПРИНЯТА ✓  (α₀ = {p_val:.4f} > α = {ALPHA})")
+        print(f"  Гипотеза Ho: ПРИНЯТА (a0 = {p_val:.4f} > α = {ALPHA})")
     else:
-        print(f"  Гипотеза H₀: ОТВЕРГНУТА ✗  (α₀ = {p_val:.4f} ≤ α = {ALPHA})")
+        print(f"  Гипотеза Ho: ОТВЕРГНУТА (a0 = {p_val:.4f} ≤ α = {ALPHA})")
 
     return params_mnk, rho_after, p_val
 
@@ -67,12 +63,12 @@ def plot_final(counts, edges, params_mnk, rho_after, p_val,
                filename="lab2_final.png"):
     from step5_plot import _theoretical_pdf
 
-    n       = counts.sum()
-    widths  = np.diff(edges)
-    omega   = counts / n
+    n = counts.sum()
+    widths = np.diff(edges)
+    omega = counts / n
     rho_emp = omega / widths
     midpoints = 0.5 * (edges[:-1] + edges[1:])
-    rho_th  = _theoretical_pdf(midpoints, params_mnk)
+    rho_th = _theoretical_pdf(midpoints, params_mnk)
 
     fig, ax = plt.subplots(figsize=(9, 5))
 
@@ -97,4 +93,3 @@ def plot_final(counts, edges, params_mnk, rho_after, p_val,
     plt.tight_layout()
     plt.savefig(filename, dpi=150)
     plt.close()
-    print(f"  График сохранён: {filename}")

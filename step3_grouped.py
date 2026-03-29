@@ -8,16 +8,15 @@ def build_grouped(data):
 
     m = 1 + int(np.log2(n))
 
-    x_low  = 0.0
-    step   = np.ceil(data.max() / m)
-    x_high = x_low + m * step
+    x_low = 0.0
+    step = np.ceil(data.max() / m)
 
     edges = [x_low + i * step for i in range(m + 1)]
     counts, edges = np.histogram(data, bins=edges)
 
     # Объединяем интервалы с ni < 5
-    counts  = list(counts)
-    edges   = list(edges)
+    counts = list(counts)
+    edges = list(edges)
 
     changed = True
     while changed:
@@ -35,23 +34,18 @@ def build_grouped(data):
                 changed = True
                 break
 
-    counts    = np.array(counts)
-    edges     = np.array(edges)
-    m_new     = len(counts)
-    widths    = np.diff(edges)
+    counts = np.array(counts)
+    edges = np.array(edges)
+    m_new = len(counts)
+    widths = np.diff(edges)
     midpoints = 0.5 * (edges[:-1] + edges[1:])
-    omega     = counts / n
-    rho       = omega / widths
+    omega = counts / n
+    rho = omega / widths
 
-    print("\n" + "=" * 55)
-    print("ШАГ 3: ГРУППИРОВАННЫЙ РЯД")
-    print("=" * 55)
+    print("ГРУППИРОВАННЫЙ РЯД")
     print(f"Интервалов по Стёрджессу: {m}")
     print(f"После объединения (ni≥5): {m_new}")
-    print(f"Все ni ≥ 5: {'ДА ✓' if counts.min() >= 5 else 'НЕТ ✗'}")
-    print()
     print(f"  {'Интервал':<22} {'Середина':>9} {'nᵢ':>6} {'ωᵢ':>8} {'ρᵢ':>12}")
-    print(f"  {'-' * 62}")
     for i in range(m_new):
         print(f"  [{edges[i]:6.2f}, {edges[i+1]:6.2f})     "
               f"{midpoints[i]:9.2f} {counts[i]:6d} {omega[i]:8.4f} {rho[i]:12.6f}")
@@ -62,9 +56,7 @@ def build_grouped(data):
 def print_table_for_report(counts, edges, midpoints, widths, n):
     omega = counts / n
     rho   = omega / widths
-    print("\n  Таблица для отчёта:")
     print(f"  {'Интервал':<14} {'Середина xᵢ':>12} {'nᵢ':>5} {'ωᵢ':>8} {'ρᵢ':>12}")
-    print("  " + "-" * 55)
     for i in range(len(counts)):
         lo = edges[i]; hi = edges[i + 1]
         print(f"  {lo:.0f} - {hi:.0f}:<14 {midpoints[i]:>12.1f} {counts[i]:>5d} "

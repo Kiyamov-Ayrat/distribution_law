@@ -5,15 +5,14 @@
 import matplotlib.pyplot as plt
 from step1_load import load_data
 from step2_stats import compute_stats
-from step3_grouped import build_grouped, print_table_for_report
+from step3_grouped import build_grouped
 
 data = load_data()
 xbar, s2, s, A, E = compute_stats(data)
 counts, edges, midpoints, widths, n = build_grouped(data)
-print_table_for_report(counts, edges, midpoints, widths, n)
 
 # Гистограмма без теории
-omega   = counts / n
+omega = counts / n
 rho_emp = omega / widths
 
 fig, ax = plt.subplots(figsize=(9, 5))
@@ -26,15 +25,3 @@ ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig("lab2_explore.png", dpi=150)
 plt.close()
-
-print(f"\n  Теоретические A и E:")
-print(f"  {'Распределение':<20} {'A':>6}  {'E':>6}")
-print(f"  {'-'*34}")
-print(f"  {'Нормальное':<20} {'0':>6}  {'0':>6}")
-print(f"  {'Лапласа':<20} {'0':>6}  {'3':>6}")
-print(f"  {'Показательное':<20} {'2':>6}  {'6':>6}")
-print(f"  {'Рэлея':<20} {'0.63':>6}  {'0.25':>6}")
-print(f"  {'Равномерное':<20} {'0':>6}  {'-1.2':>6}")
-print(f"\n  Твои значения:  A = {A:.4f},  E = {E:.4f}")
-print(f"\n  Если A≈2 и E≈6 — гипотеза: показательное.")
-print(f"  Запусти: python step2_test_hypothesis.py")

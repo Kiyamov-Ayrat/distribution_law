@@ -20,13 +20,9 @@ def load_data():
 
     if "On Bottom (unitless)" in df.columns:
         mask &= df["On Bottom (unitless)"] == 1
-    else:
-        print("  ПРЕДУПРЕЖДЕНИЕ: столбец 'On Bottom (unitless)' не найден, фильтр пропущен")
 
     if "Total Pump Output (gal_per_min)" in df.columns:
         mask &= df["Total Pump Output (gal_per_min)"] > 50
-    else:
-        print("  ПРЕДУПРЕЖДЕНИЕ: столбец 'Total Pump Output (gal_per_min)' не найден, фильтр пропущен")
 
     raw = df.loc[mask, CSV_COLUMN].dropna()
 
@@ -38,19 +34,16 @@ def load_data():
 
     data = raw.values
 
-    print("=" * 55)
-    print("ШАГ 1: ДАННЫЕ")
-    print("=" * 55)
-    print(f"Файл:              {CSV_FILE}")
-    print(f"Столбец:           {CSV_COLUMN}")
-    print(f"Строк в файле:     {total_rows}")
-    print(f"После On Bottom=1 + Pump>50: {mask.sum()}")
+    print("ДАННЫЕ")
+    print(f"Файл: {CSV_FILE}")
+    print(f"Столбец: {CSV_COLUMN}")
+    print(f"Строк в файле: {total_rows}")
     lo = VALUE_MIN if VALUE_MIN is not None else '-∞'
     hi = VALUE_MAX if VALUE_MAX is not None else '+∞'
     print(f"После фильтра [{lo}, {hi}]: {len(data)}")
-    print(f"n (итого):         {len(data)}")
-    print(f"Минимум:  {data.min():.4f}")
+    print(f"n (итого): {len(data)}")
+    print(f"Минимум: {data.min():.4f}")
     print(f"Максимум: {data.max():.4f}")
-    print(f"Среднее:  {data.mean():.4f}")
+    print(f"Среднее: {data.mean():.4f}")
 
     return data
